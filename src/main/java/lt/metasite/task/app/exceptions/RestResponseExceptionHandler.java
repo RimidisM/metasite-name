@@ -17,4 +17,10 @@ public class RestResponseExceptionHandler extends ResponseEntityExceptionHandler
         return handleExceptionInternal(ex, ErrorResponse.builder().error(ex.getLocalizedMessage()).build(),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
+    @ExceptionHandler(value = {RequestValidationException.class})
+    protected ResponseEntity<Object> handleRequestValidationException(RequestValidationException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ErrorResponse.builder().error(ex.getLocalizedMessage()).build(),
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
 }

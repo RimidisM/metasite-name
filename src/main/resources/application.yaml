@@ -9,3 +9,6 @@ openapi:
   title: METASITE task
   version: v1.0.0
   description: Develop
+
+application:
+  fileExtension: txt
