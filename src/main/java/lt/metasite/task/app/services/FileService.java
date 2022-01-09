@@ -1,10 +1,12 @@
 package lt.metasite.task.app.services;
 
+import lt.metasite.task.app.domains.SortedResult;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,6 +38,19 @@ public class FileService {
 
     private static final String FILE_EXTENSION = ".txt";
     private static final String FILE_NAME_RESULT = "result_";
+    private static final String WORD_SEPARATOR = ",\\t\\n\\r";
+    private static final String NEW_LINE_REGEX = "[\\t\\n\\r]+";
+    private static final String EMPTY = "";
+    private static final String SPACE = " ";
+    private static final String REGEX_FOR_ALPHABET = "[^A-Za-z ]+";
+    private static final String REGEX_FOR_A_G = "^[A-Ga-g]*$";
+    private static final String REGEX_FOR_H_N = "^[H-Nh-n]*$";
+    private static final String REGEX_FOR_O_U = "^[O-Uo-u]*$";
+    private static final String REGEX_FOR_V_Z = "^[V-Zv-z]*$";
+    private static final String A_G = "A-G";
+    private static final String H_N = "H-N";
+    private static final String O_U = "O-U";
+    private static final String V_Z = "V-Z";
 
     public InputStreamResource parse(List<MultipartFile> files) throws IOException {
 
@@ -49,52 +65,24 @@ public class FileService {
         }).filter(Objects::nonNull).flatMap(Collection::parallelStream)
                 .collect(Collectors.toList());
 
-
-        ConcurrentMap<String, Long> collect = main.parallelStream().collect(Collectors
-                .toConcurrentMap(Function.identity(), v -> 1L, Long::sum));
-
-        Map<String, Long> ag = new HashMap<>();
-        Map<String, Long> hn = new HashMap<>();
-        Map<String, Long> ou = new HashMap<>();
-        Map<String, Long> vz = new HashMap<>();
-
-        collect.forEach((s, aLong) -> {
-
-            if (s.substring(0, 1).matches("^[A-Ga-g]*$")) {
-                ag.put(s, aLong);
-            }
-
-            if (s.substring(0, 1).matches("^[H-Nh-n]*$")) {
-                hn.put(s, aLong);
-            }
-
-            if (s.substring(0, 1).matches("^[O-Uo-u]*$")) {
-                ou.put(s, aLong);
-            }
-
-            if (s.substring(0, 1).matches("^[V-Zv-z]*$")) {
-                vz.put(s, aLong);
-            }
-        });
-
+        List<SortedResult> results = getSortedResults(main.parallelStream().collect(Collectors
+                .toConcurrentMap(Function.identity(), v -> 1L, Long::sum)));
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
         ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
 
-        List<Map<String, Long>> result = new ArrayList<>();
-
-        result.add(ag);
-        result.add(hn);
-        result.add(ou);
-        result.add(vz);
-
-        result.forEach(stringLongMap -> {
+        results.forEach(stringLongMap -> {
             try {
-                String word = stringLongMap.entrySet().iterator().next().getKey();
 
-                createZip(createFile(FILE_NAME_RESULT + word, stringLongMap), FILE_NAME_RESULT + word, zipOutputStream);
+                if (!CollectionUtils.isEmpty(Optional.ofNullable(stringLongMap).map(SortedResult::getResult)
+                        .orElse(new HashMap<>()))) {
 
+                    String name = Optional.ofNullable(stringLongMap).map(SortedResult::getName).orElse(EMPTY);
+
+                    createZip(createFile(FILE_NAME_RESULT + name, Optional.ofNullable(stringLongMap)
+                                    .map(SortedResult::getResult).orElse(new HashMap<>())),
+                            FILE_NAME_RESULT + name, zipOutputStream);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -107,22 +95,22 @@ public class FileService {
 
     private List<String> convertFileContentToList(byte[] bytes) {
 
-        String content = new String(bytes).replaceAll("[\\t\\n\\r]+", " ").replaceAll("[^A-Za-z ]+", "");
+        String content = new String(bytes).replaceAll(NEW_LINE_REGEX, SPACE).replaceAll(REGEX_FOR_ALPHABET, EMPTY);
 
-        return Stream.of(content.split(" ", -1))
+        return Stream.of(content.split(SPACE, -1))
                 .collect(Collectors.toList())
-                .parallelStream().filter(x -> !x.equalsIgnoreCase("")).collect(Collectors.toList());
+                .parallelStream().filter(x -> !x.equalsIgnoreCase(EMPTY)).collect(Collectors.toList());
     }
 
     private String mapToString(Map<String, Long> map) {
         return map.keySet().stream()
                 .map(key -> key + " = " + map.get(key))
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.joining(WORD_SEPARATOR));
     }
 
     private File createFile(String fileName, Map<String, Long> map) throws IOException {
 
-        File file = File.createTempFile(fileName, ".txt");
+        File file = File.createTempFile(fileName, FILE_EXTENSION);
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(mapToString(map).getBytes());
@@ -155,5 +143,41 @@ public class FileService {
         IOUtils.copy(inputStream, zipOutputStream);
         inputStream.close();
         zipOutputStream.closeEntry();
+    }
+
+    private List<SortedResult> getSortedResults(ConcurrentMap<String, Long> collect) {
+
+        Map<String, Long> ag = new HashMap<>();
+        Map<String, Long> hn = new HashMap<>();
+        Map<String, Long> ou = new HashMap<>();
+        Map<String, Long> vz = new HashMap<>();
+
+        collect.forEach((s, aLong) -> {
+
+            if (s.substring(0, 1).matches(REGEX_FOR_A_G)) {
+                ag.put(s, aLong);
+            }
+
+            if (s.substring(0, 1).matches(REGEX_FOR_H_N)) {
+                hn.put(s, aLong);
+            }
+
+            if (s.substring(0, 1).matches(REGEX_FOR_O_U)) {
+                ou.put(s, aLong);
+            }
+
+            if (s.substring(0, 1).matches(REGEX_FOR_V_Z)) {
+                vz.put(s, aLong);
+            }
+        });
+
+        List<SortedResult> results = new ArrayList<>();
+
+        results.add(SortedResult.builder().name(A_G).result(ag).build());
+        results.add(SortedResult.builder().name(H_N).result(hn).build());
+        results.add(SortedResult.builder().name(O_U).result(ou).build());
+        results.add(SortedResult.builder().name(V_Z).result(vz).build());
+
+        return results;
     }
 }
