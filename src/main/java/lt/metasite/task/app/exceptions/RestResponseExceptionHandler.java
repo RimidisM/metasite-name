@@ -17,12 +17,12 @@ import java.util.NoSuchElementException;
 @ControllerAdvice
 public class RestResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(RestResponseExceptionHandler.class);
+    private final Logger loggerException = LoggerFactory.getLogger(RestResponseExceptionHandler.class);
 
     @ExceptionHandler(value = {FileUploadException.class})
     protected ResponseEntity<Object> handleFileUploadException(FileUploadException ex, WebRequest request) {
 
-        logger.warn("Error: {}", ex.getLocalizedMessage());
+        loggerException.warn("Error: {}", ex.getLocalizedMessage());
 
         return handleExceptionInternal(ex, ErrorResponse.builder().error(ex.getLocalizedMessage()).build(),
                 getApplicationJsonHeader(), HttpStatus.BAD_REQUEST, request);
@@ -31,7 +31,7 @@ public class RestResponseExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(value = {RequestValidationException.class})
     protected ResponseEntity<Object> handleRequestValidationException(RequestValidationException ex, WebRequest request) {
 
-        logger.warn("Request validation error: {}", ex.getLocalizedMessage());
+        loggerException.warn("Request validation error: {}", ex.getLocalizedMessage());
 
         return handleExceptionInternal(ex, ErrorResponse.builder().error(ex.getLocalizedMessage()).build(),
                 getApplicationJsonHeader(), HttpStatus.BAD_REQUEST, request);
@@ -40,7 +40,7 @@ public class RestResponseExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(value = {NoSuchElementException.class})
     protected ResponseEntity<Object> handleRequestValidationException(NoSuchElementException ex, WebRequest request) {
 
-        logger.warn("Request validation error: {}", ex.getLocalizedMessage());
+        loggerException.warn("Request validation error: {}", ex.getLocalizedMessage());
 
         return handleExceptionInternal(ex, ErrorResponse.builder().error(ex.getLocalizedMessage()).build(),
                 getApplicationJsonHeader(), HttpStatus.BAD_REQUEST, request);

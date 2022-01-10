@@ -65,8 +65,12 @@ public class FileService {
         }).filter(Objects::nonNull).flatMap(Collection::parallelStream)
                 .collect(Collectors.toList());
 
+        logger.info("Words from files: {}", main);
+
         List<SortedResult> results = getSortedResults(main.parallelStream().collect(Collectors
                 .toConcurrentMap(Function.identity(), v -> 1L, Long::sum)));
+
+        logger.info("Sorted words: {}", results);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
@@ -96,6 +100,8 @@ public class FileService {
     private List<String> convertFileContentToList(byte[] bytes) {
 
         String content = new String(bytes).replaceAll(NEW_LINE_REGEX, SPACE).replaceAll(REGEX_FOR_ALPHABET, EMPTY);
+
+        logger.info("File content: {}", content);
 
         return Stream.of(content.split(SPACE, -1))
                 .collect(Collectors.toList())
