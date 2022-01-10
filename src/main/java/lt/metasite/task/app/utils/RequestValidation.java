@@ -1,11 +1,11 @@
 package lt.metasite.task.app.utils;
 
 import lt.metasite.task.app.exceptions.RequestValidationException;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 public class RequestValidation {
 
@@ -23,14 +23,13 @@ public class RequestValidation {
             if (StringUtils.hasText(multipartFile.getOriginalFilename())) {
                 String extension = null;
                 try {
-                    extension = Optional.ofNullable(multipartFile.getOriginalFilename())
-                            .filter(f -> f.contains("."))
-                            .map(f -> f.substring(multipartFile.getOriginalFilename().lastIndexOf(".") + 1)).get();
+
+                    extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
                 } catch (Exception e) {
                     throw new RequestValidationException("Request is not valid. Please check files you have attached");
                 }
 
-                if (!fileExtension.equalsIgnoreCase(extension)) {
+                if (!StringUtils.hasText(extension) || !fileExtension.equalsIgnoreCase(extension)) {
                     throw new RequestValidationException("There is files with not valid extension. Only ." + fileExtension + " files are available");
                 }
             } else {

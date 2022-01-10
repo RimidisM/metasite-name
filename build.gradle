@@ -26,6 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-web-services'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
 
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.5.9'
 
