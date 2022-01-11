@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/parse")
+@RequestMapping("/v1/parse")
 public class FileController {
 
     private final Logger logger = LoggerFactory.getLogger(FileController.class);
