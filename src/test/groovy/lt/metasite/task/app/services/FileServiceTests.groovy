@@ -16,8 +16,8 @@ class FileServiceTests extends TestSpecifications{
         def bytes = result.inputStream.readAllBytes()
 
         then:
-        getString(bytes) == "a = 1,\\t\\n\\rb = 1,\\t\\n\\rg = 1"
+        getString(bytes) == "as = 3"
         result.exists()
-        bytes.length == 578
+        bytes.length == 567
     }
 }

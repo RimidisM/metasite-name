@@ -38,8 +38,8 @@ public class FileService {
 
     private static final String FILE_EXTENSION = ".txt";
     private static final String FILE_NAME_RESULT = "result_";
-    private static final String WORD_SEPARATOR = ",\\t\\n\\r";
-    private static final String NEW_LINE_REGEX = "[\\t\\n\\r]+";
+    private static final String WORD_SEPARATOR = "\t\n\r";
+    private static final String NEW_LINE_REGEX = "[\t\n\r]+";
     private static final String EMPTY = "";
     private static final String SPACE = " ";
     private static final String REGEX_FOR_ALPHABET = "[^A-Za-z ]+";
