@@ -1,17 +1,39 @@
 plugins {
+    id 'org.springframework.boot' version '2.5.6'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id "io.freefair.lombok" version "5.3.0"
     id 'java'
+    id 'groovy'
+    id 'idea'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+idea {
+    module {
+        testSourceDirs += file('src/test/groovy')
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.5.9'
+
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.0-groovy-3.0'
+    testImplementation group: 'org.spockframework', name: 'spock-spring', version: '2.0-groovy-3.0'
+    testImplementation 'org.codehaus.groovy:groovy-all:2.5.8'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {

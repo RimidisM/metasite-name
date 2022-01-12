@@ -1,0 +1,14 @@
+server:
+  port: 7777
+
+Spring:
+  application:
+    name: metasite-task
+
+openapi:
+  title: METASITE task
+  version: v1.0.0
+  description: Develop
+
+application:
+  fileExtension: txt
