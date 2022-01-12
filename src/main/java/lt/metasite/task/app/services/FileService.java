@@ -59,7 +59,7 @@ public class FileService {
             try {
                 return convertFileContentToList(r.getInputStream().readAllBytes());
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Exception when converting file content to list. Error: {}", e.getLocalizedMessage());
             }
             return null;
         }).filter(Objects::nonNull).flatMap(Collection::parallelStream)
@@ -88,7 +88,7 @@ public class FileService {
                             FILE_NAME_RESULT + name, zipOutputStream);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+               logger.error("Exception during response construction. Error: {}", e.getLocalizedMessage());
             }
         });
 

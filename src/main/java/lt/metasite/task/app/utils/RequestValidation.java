@@ -21,13 +21,8 @@ public class RequestValidation {
             }
 
             if (StringUtils.hasText(multipartFile.getOriginalFilename())) {
-                String extension = null;
-                try {
 
-                    extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
-                } catch (Exception e) {
-                    throw new RequestValidationException("Request is not valid. Please check files you have attached");
-                }
+                String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
 
                 if (!StringUtils.hasText(extension) || !fileExtension.equalsIgnoreCase(extension)) {
                     throw new RequestValidationException("There is files with not valid extension. Only ." + fileExtension + " files are available");
